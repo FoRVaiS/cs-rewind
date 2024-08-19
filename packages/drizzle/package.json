@@ -1,0 +1,24 @@
+{
+  "name": "@rewind/drizzle",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/models/schema.ts"
+  },
+  "scripts": {
+    "lint": "eslint --ext ts src && tsc --noEmit --project tsconfig.json",
+    "drizzle-kit": "drizzle-kit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.32.1",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.14.12",
+    "drizzle-kit": "^0.22.1",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,132 @@
+# syntax=docker/dockerfile:1
+ARG SCOPE
+ARG PROJECT
+
+ARG USER=node
+ARG WORKSPACE=/workspace
+
+ARG DOCKER_NODE_VERSION=20.16.0-slim
+ARG DOCKER_UBUNTU_VERSION=jammy-20240530
+
+ARG UID=1001
+ARG GID=1001
+
+# ========================== NODE STAGE ==========================
+FROM node:${DOCKER_NODE_VERSION} AS node
+# Copy all the required libraries for Node to run in a scratch container
+RUN mkdir -p /node-deps/lib/x86_64-linux-gnu \
+      /node-deps/usr/lib/x86_64-linux-gnu \
+      /node-deps/lib64 \
+    && ldd $(which node) \
+      | grep '=>' \
+      | awk '{ print $3 }' \
+      | xargs -I '{}' cp -v '{}' /node-deps'{}'
+
+
+# ========================== TURBO STAGE ==========================
+FROM node:${DOCKER_NODE_VERSION} AS turbo
+ARG SCOPE
+ARG PROJECT
+ARG WORKSPACE
+WORKDIR ${WORKSPACE}
+
+COPY --chown=${USER}:${USER} ./package*.json ./
+RUN npm install
+
+COPY --chown=${USER}:${USER} ./ ./
+RUN npx --no-install turbo prune ${SCOPE}/${PROJECT} --docker \
+    && mv ./out/package-lock.json ./out/full/package-lock.json
+
+
+# ========================== DEV MODULES STAGE ==========================
+FROM node:${DOCKER_NODE_VERSION} AS dev-modules
+ARG WORKSPACE
+
+WORKDIR ${WORKSPACE}
+COPY --from=turbo --chown=${USER}:${USER} ${WORKSPACE}/out/json ./
+
+RUN npm install
+
+# ========================== PROD MODULES STAGE ==========================
+FROM node:${DOCKER_NODE_VERSION} AS prod-modules
+ARG WORKSPACE
+
+WORKDIR ${WORKSPACE}
+COPY --from=turbo --chown=${USER}:${USER} ${WORKSPACE}/out/json ./
+
+RUN npm install --omit=dev tsx@4.16.2
+
+
+# ========================== BASE STAGE ==========================
+FROM ubuntu:${DOCKER_UBUNTU_VERSION} AS base
+ARG PROJECT
+ARG USER
+ARG WORKSPACE
+ARG UID
+ARG GID
+
+RUN apt-get update \
+    && apt-get -qq install -y --no-install-recommends \
+    # Install Tini for signal handling
+    tini
+
+# Copy Node/NPM binaries and libraries
+COPY --from=node /usr/local/include/ /usr/local/include/
+COPY --from=node /usr/local/lib/ /usr/local/lib/
+COPY --from=node /usr/local/bin/ /usr/local/bin/
+
+# Create user and workspace
+RUN groupadd --gid ${GID} ${USER} \
+    && useradd --uid ${UID} --gid ${GID} --shell /bin/bash --create-home ${USER} \
+    && mkdir ${WORKSPACE} \
+    && chown -R ${USER}:${USER} ${WORKSPACE}
+
+USER ${USER}
+WORKDIR ${WORKSPACE}
+
+COPY --from=turbo --chown=${USER}:${USER} ${WORKSPACE}/out/full ./
+
+
+# ========================== DEVELOPMENT STAGE ==========================
+FROM base AS development
+ARG USER
+ARG WORKSPACE
+
+ENV NODE_ENV=development
+
+COPY --from=dev-modules --chown=${USER}:${USER} ${WORKSPACE}/node_modules ./node_modules
+
+WORKDIR ${WORKSPACE}/apps/${PROJECT}
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["npm", "run", "start:dev"]
+
+
+# ========================== PRODUCTION STAGE ==========================
+FROM scratch AS production
+ARG PROJECT
+ARG WORKSPACE
+WORKDIR ${WORKSPACE}
+
+ENV NODE_ENV=production
+
+# Copy Tini
+COPY --from=base /usr/bin/tini /usr/bin/tini
+
+# Copy necessary libraries to run Node in a scratch container
+COPY --from=node /node-deps/ /
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /lib64/ld-linux-x86-64.so.2 /lib64/
+
+# Copy source files
+COPY --from=base --chown=${USER}:${USER} ${WORKSPACE}/apps/${PROJECT}/src ${WORKSPACE}/apps/${PROJECT}/src
+
+# Copy production dependencies
+COPY --from=prod-modules --chown=${USER}:${USER} ${WORKSPACE}/node_modules ${WORKSPACE}/node_modules
+
+# Copy internal packages
+COPY --from=base --chown=${USER}:${USER} ${WORKSPACE}/packages ${WORKSPACE}/packages
+
+WORKDIR ${WORKSPACE}/apps/${PROJECT}
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["node", "--import", "tsx", "src/"]

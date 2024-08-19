@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    ".env"
+  ],
+  "globalPassThroughEnv": [
+    "*"
+  ],
+  "tasks": {
+    "build": {
+      "outputs": [
+        "./dist/**"
+      ]
+    },
+    "lint": {},
+    "start:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": [
+        "^@rewind/frontend#build"
+      ],
+      "cache": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@rewind/logger",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint --ext ts src && tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "winston": "^3.14.1",
+    "winston-transport": "^4.7.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.14.12",
+    "typescript": "^5.5.4"
+  }
+}
