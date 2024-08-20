@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ThemeProvider } from './components/theme-provider.tsx';
 
 import App from './pages/App/App.tsx';
 import './index.scss';
@@ -13,9 +14,11 @@ const queryClient = new QueryClient();
 
 root.render(<>
   <QueryClientProvider client={queryClient}>
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-    <ReactQueryDevtools />
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme" >
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+      <ReactQueryDevtools />
+    </ThemeProvider>
   </QueryClientProvider>
 </>);
