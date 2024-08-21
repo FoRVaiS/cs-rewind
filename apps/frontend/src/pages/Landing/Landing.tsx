@@ -1,21 +1,30 @@
-import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 
-import './Landing.scss';
+import { Button } from '@/components/ui/button';
 
-const apiHealthEndpoint = '/api/healthz';
+import en from '@/locales/en.ts';
 
-function Landing() {
-  const healthQuery = useQuery({
-    queryKey: ['api_health'],
-    queryFn: () => fetch(apiHealthEndpoint),
-  });
-
+function LandingPage() {
   return (
-    <>
-      <h1>Hello World!</h1>
-      <p>API Status: {healthQuery.data?.status === 200 ? 'Online' : 'Offline'}</p>
-    </>
+    <main className="flex-grow flex items-center justify-center px-4">
+      <div className="max-w-3xl mx-auto text-center">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6">
+          {en.LANDING_PAGE_SLOGAN}
+        </h2>
+        <p className="text-xl sm:text-2xl text-muted-foreground mb-8">
+          {en.LANDING_PAGE_DESCRIPTION}
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild size="lg" variant="secondary">
+            <Link className="select-none" to="/login">{en.LOGIN}</Link>
+          </Button>
+          <Button asChild size="lg">
+            <Link className="select-none" to="/register">{en.REGISTER}</Link>
+          </Button>
+        </div>
+      </div>
+    </main>
   );
 }
 
-export default Landing;
+export default LandingPage;

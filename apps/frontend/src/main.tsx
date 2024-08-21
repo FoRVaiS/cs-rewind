@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from './components/theme-provider.tsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
+import Header from './pages/Header.tsx';
 import Landing from './pages/Landing/Landing.tsx';
 import NotFound from './pages/404.tsx';
 
@@ -18,11 +19,11 @@ const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Landing />,
+    element: <Header><Landing /></Header>,
   },
   {
     path: '*',
-    element: <NotFound />,
+    element: <Header><NotFound /></Header>,
   },
 ]);
 
