@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
-import './App.scss';
+import './Landing.scss';
 
 const apiHealthEndpoint = '/api/healthz';
 
-function App() {
+function Landing() {
   const healthQuery = useQuery({
     queryKey: ['api_health'],
     queryFn: () => fetch(apiHealthEndpoint),
@@ -18,4 +18,4 @@ function App() {
   );
 }
 
-export default App;
+export default Landing;

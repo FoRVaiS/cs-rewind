@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from './components/theme-provider.tsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import App from './pages/App/App.tsx';
+import Landing from './pages/Landing/Landing.tsx';
 import NotFound from './pages/404.tsx';
 
 import './index.scss';
@@ -18,7 +18,7 @@ const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <Landing />,
   },
   {
     path: '*',
