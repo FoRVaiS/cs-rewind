@@ -6,6 +6,8 @@ import { ThemeProvider } from './components/theme-provider.tsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import App from './pages/App/App.tsx';
+import NotFound from './pages/404.tsx';
+
 import './index.scss';
 
 const container = document.getElementById('_react_root')!;
@@ -17,6 +19,10 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ]);
 
