@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import Header from './pages/Header.tsx';
 import Landing from './pages/Landing/Landing.tsx';
+import Registration from './pages/Registration/Registration.tsx';
 import NotFound from './pages/404.tsx';
 
 import './index.scss';
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Header><Landing /></Header>,
+  },
+  {
+    path: '/register',
+    element: <Header><Registration /></Header>,
   },
   {
     path: '*',
