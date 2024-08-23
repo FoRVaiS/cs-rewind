@@ -13,6 +13,7 @@
       ]
     },
     "lint": {},
+    "test:unit": {},
     "start:dev": {
       "cache": false,
       "persistent": true

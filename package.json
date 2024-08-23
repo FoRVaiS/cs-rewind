@@ -31,6 +31,7 @@
     "start:dev": "cross-env NODE_ENV=development dotenv -- turbo run start:dev",
     "build": "cross-env NODE_ENV=production dotenv -- turbo run build",
     "lint": "dotenv -- turbo run lint",
+    "test:unit": "dotenv -- turbo run test:unit",
     "drizzle": "dotenv -- npm run -w packages/drizzle drizzle-kit --"
   }
 }
