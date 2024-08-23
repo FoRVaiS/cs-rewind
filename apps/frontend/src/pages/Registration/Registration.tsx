@@ -1,6 +1,7 @@
 import { Dispatch, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 import z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -84,8 +85,11 @@ const formValidator = z.object({
   matchCode: matchCodeValidator.optional(),
 });
 
+type FormData = z.infer<typeof formValidator>;
+
 function RegistrationPage() {
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
   // Form Data
   const [email, setEmail] = useState<string>('');
@@ -94,7 +98,15 @@ function RegistrationPage() {
   const [authCode, setAuthCode] = useState<string>();
   const [matchCode, setMatchCode] = useState<string>();
 
-  const data = { email, password, passwordConfirm, authCode, matchCode };
+  const apiRegisterAccount = useMutation({
+    mutationFn: (data: FormData) => fetch('/api/user/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }),
+  });
 
   /* eslint-disable object-property-newline -- Reason: In-lining alike properties saves space and cognitive overhead */
   const registrationFormProps: RegistrationFormProps = {
@@ -114,15 +126,25 @@ function RegistrationPage() {
     [<CsIntegrationForm key="registration-form-2" {...csIntegrationProps} />, en.REGISTRATION_FORM_CS_INTEGRATION_TITLE, true],
   ];
 
-  const next = () => setPage(clamp(page + 1, 1, forms.length));
-  const prev = () => setPage(clamp(page - 1, 1, forms.length));
   const submit = () => {
+    const data: FormData = { email, password, passwordConfirm, authCode, matchCode };
     const validation = formValidator.parse(data);
 
     if (password !== passwordConfirm) throw new Error(en.ERROR_MISMATCHED_PASSWORDS);
 
-    console.log(validation);
+    apiRegisterAccount.mutate(validation, {
+      onSuccess: data => {
+        const { status } = data;
+
+        if (status === 200) return navigate('/login');
+
+        console.warn(`Unsure how to handle a ${status} response. Not doing anything.`);
+      },
+    });
   };
+
+  const next = () => setPage(clamp(page + 1, 1, forms.length));
+  const prev = () => setPage(clamp(page - 1, 1, forms.length));
   const skip = () => (page === forms.length ? submit() : next());
 
   const [form, title, isSkippable] = forms[page - 1];
