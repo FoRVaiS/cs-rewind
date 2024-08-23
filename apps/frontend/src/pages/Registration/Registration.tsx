@@ -127,8 +127,8 @@ function RegistrationPage() {
   ];
 
   const submit = () => {
-    const data: FormData = { email, password, passwordConfirm, authCode, matchCode };
-    const validation = formValidator.parse(data);
+    const formData: FormData = { email, password, passwordConfirm, authCode, matchCode };
+    const validation = formValidator.parse(formData);
 
     if (password !== passwordConfirm) throw new Error(en.ERROR_MISMATCHED_PASSWORDS);
 
@@ -138,7 +138,7 @@ function RegistrationPage() {
 
         if (status === 200) return navigate('/login');
 
-        console.warn(`Unsure how to handle a ${status} response. Not doing anything.`);
+        return console.warn(`Unsure how to handle a ${status} response. Not doing anything.`);
       },
     });
   };
