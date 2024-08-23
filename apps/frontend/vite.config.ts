@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
               return '/healthz';
             }
 
-            return path;
+            return path.replace('/api', '/api/v1');
           },
         },
       },
