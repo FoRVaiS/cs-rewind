@@ -6,8 +6,8 @@ import en from '@/locales/en.ts';
 
 function LandingPage() {
   return (
-    <main className="flex-grow flex items-center justify-center px-4">
-      <div className="max-w-3xl mx-auto text-center">
+    <main className="flex flex-col px-4">
+      <div className="max-w-3xl mx-auto mt-48 text-center">
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6">
           {en.LANDING_PAGE_SLOGAN}
         </h2>
