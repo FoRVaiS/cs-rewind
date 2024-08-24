@@ -57,7 +57,7 @@ function LoginPage() {
     <main className="flex flex-col items-center">
       <Card className="mx-auto mt-16 min-w-[448px]">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-xl text-center">Login</CardTitle>
         </CardHeader>
 
         <CardContent className="grid gap-4">
