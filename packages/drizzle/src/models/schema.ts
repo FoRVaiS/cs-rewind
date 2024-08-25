@@ -4,6 +4,15 @@ import { relations, InferInsertModel, InferSelectModel } from 'drizzle-orm';
 export const CS_GAME_MODES = ['premier', 'competitive', 'wingman'] as const;
 export const CS_DEMO_SOURCES = ['VALVE', 'FACEIT'] as const;
 
+export const users = pgTable('users', {
+  /** PRIMARY KEY/Auto-Generated */
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+
+  email: text('email').unique().notNull(),
+  password: text('password').notNull(),
+  salt: text('salt').notNull(),
+});
+
 export const players = pgTable('players', {
   /** PRIMARY KEY/STEAMID64 */
   id: char('player_steam_id', { length: 64 }).primaryKey(),
@@ -72,6 +81,9 @@ export const playerRecordRelation = relations(playerRecords, ({ one }) => ({
   }),
 }));
 
+
+export type UsersInsert = InferInsertModel<typeof users>;
+export type UsersSelect = InferSelectModel<typeof users>;
 export type PlayersInsert = InferInsertModel<typeof players>;
 export type PlayersSelect = InferSelectModel<typeof players>;
 export type PlayerRecordsInsert = InferInsertModel<typeof playerRecords>;

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "demos" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "matches" (
-	"id" integer PRIMARY KEY NOT NULL,
+	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "matches_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"played_on" timestamp NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"map" text NOT NULL,
@@ -29,4 +29,12 @@ CREATE TABLE IF NOT EXISTS "player_records" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "players" (
 	"player_steam_id" char(64) PRIMARY KEY NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "users" (
+	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "users_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"email" text NOT NULL,
+	"password" text NOT NULL,
+	"salt" text NOT NULL,
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
