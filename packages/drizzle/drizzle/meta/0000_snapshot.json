@@ -1,5 +1,5 @@
 {
-  "id": "128f15ed-86d9-476e-bdaf-85f7c2a3cd9f",
+  "id": "92276416-9253-4715-a83f-1f5120bec9a1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -17,6 +17,12 @@
         "match_id": {
           "name": "match_id",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -90,9 +96,51 @@
           "primaryKey": false,
           "notNull": true
         },
-        "steam_id": {
-          "name": "steam_id",
+        "player_steam_id": {
+          "name": "player_steam_id",
           "type": "char(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leetify_rating": {
+          "name": "leetify_rating",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kills": {
+          "name": "kills",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assists": {
+          "name": "assists",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deaths": {
+          "name": "deaths",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enemies_flashed": {
+          "name": "enemies_flashed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "damage_explosive": {
+          "name": "damage_explosive",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "damage_fire": {
+          "name": "damage_fire",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         }
@@ -100,11 +148,11 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "player_records_match_id_steam_id_pk": {
-          "name": "player_records_match_id_steam_id_pk",
+        "player_records_match_id_player_steam_id_pk": {
+          "name": "player_records_match_id_player_steam_id_pk",
           "columns": [
             "match_id",
-            "steam_id"
+            "player_steam_id"
           ]
         }
       },
@@ -114,8 +162,8 @@
       "name": "players",
       "schema": "",
       "columns": {
-        "steam_id": {
-          "name": "steam_id",
+        "player_steam_id": {
+          "name": "player_steam_id",
           "type": "char(64)",
           "primaryKey": true,
           "notNull": true
