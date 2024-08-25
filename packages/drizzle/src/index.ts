@@ -10,6 +10,7 @@ import { migrate as pgMigrate } from 'drizzle-orm/postgres-js/migrator';
 import * as schema from './models/schema.js';
 
 export type Client = ReturnType<typeof pgDrizzle<typeof schema>>;
+export const PgError = postgres.PostgresError;
 
 const queryAutomaticUpdatedAt = sql`
   create or replace function on_row_update_set_updated_at() returns trigger
