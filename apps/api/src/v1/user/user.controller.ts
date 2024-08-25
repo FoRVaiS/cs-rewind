@@ -1,19 +1,24 @@
 import express from 'express';
-import z from 'zod';
+import z, { ZodError } from 'zod';
 
 import { ApiError } from '@rewind/express-api/errors';
+import { raise, raiseApi } from '@rewind/express-api/utils';
 import { PgError } from '@rewind/drizzle';
 
-import { encryptPassword } from './user.service.js';
-import { addUser } from './user.model.js';
+import { encryptPassword, comparePasswords, login } from './user.service.js';
+import { addUser, getUser } from './user.model.js';
 
-const registerBodyValidator = z.object({
+const credentialsValidator = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
+const loginCredentialsValidator = credentialsValidator.extend({
+  password: z.string(), // Do not care if the user does not meet length requirements, it is wrong anyways.
+});
+
 export async function handleRegisterRequest(req: express.Request) {
-  const { email, password } = registerBodyValidator.parse(req.body);
+  const { email, password } = credentialsValidator.parse(req.body);
 
   const [hashedPassword, salt] = await encryptPassword(password);
 
@@ -29,6 +34,36 @@ export async function handleRegisterRequest(req: express.Request) {
     }
 
     if (e instanceof ApiError) return e;
+
+    return new ApiError('Internal Server Error', 500);
+  }
+}
+
+export async function handleLoginRequest(req: express.Request) {
+  try {
+    const { email, password } = loginCredentialsValidator.parse(req.body);
+
+    const user = (await getUser(email)) ?? raiseApi(`User ${email} does not exist.`, 404);
+    const passwordValidator = comparePasswords.bind(null, user.password);
+
+    const authenticated = await login(password, user.salt, passwordValidator);
+    if (!authenticated) return new ApiError('Incorrect email or password', 401);
+
+    return 'OK!';
+  } catch (e) {
+    if (e instanceof ApiError) return e;
+
+    if (e instanceof ZodError) {
+      const error = e.issues[0] ?? raise('ZodError was raised but could find the first ZodIssue');
+
+      const { code } = error;
+      const path = error.path[0] ?? raise('Could not find offending key');
+
+      if (path === 'email' && code === 'invalid_type') return new ApiError('The email address provided is not valid.', 400); // Missing "email" in body
+      if (path === 'email' && code === 'invalid_string') return new ApiError('Please enter a valid email address format.', 400); // Bad email format
+
+      if (path === 'password' && code === 'invalid_type') return new ApiError('The password provided is not valid.', 400); // Missing "password" in body
+    }
 
     return new ApiError('Internal Server Error', 500);
   }
