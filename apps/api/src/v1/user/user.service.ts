@@ -18,7 +18,7 @@ export function comparePasswords(passwordA: string, passwordB: string) {
   return timingSafeEqual(Buffer.from(passwordA, 'hex'), Buffer.from(passwordB, 'hex'));
 }
 
-export async function login(password: string, salt: string, passwordValidator: (password: string) => boolean) {
+export async function login(password: string, salt: string, passwordValidator: (_password: string) => boolean) {
   const [hashedPassword] = await encryptPassword(password, salt);
 
   return passwordValidator(hashedPassword);
