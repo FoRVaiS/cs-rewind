@@ -135,3 +135,11 @@ export function use<T extends ResponseData>(handler: Handler<T> | HandlerPromise
     }
   };
 }
+
+export function raiseApi(msg: string, code: number): never {
+  throw new ApiError(msg, code);
+}
+
+export function raise(msg: string): never {
+  throw new Error(msg);
+}
