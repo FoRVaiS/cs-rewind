@@ -12,6 +12,7 @@ import Login from './pages/Login/Login.tsx';
 import NotFound from './pages/404.tsx';
 
 import './index.scss';
+import Dashboard from './pages/Dashboard/Dashboard.tsx';
 
 const container = document.getElementById('_react_root')!;
 const root = ReactDOM.createRoot(container);
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <Header><Login /></Header>,
+  },
+  {
+    path: '/dashboard',
+    element: <Header><Dashboard /></Header>,
   },
   {
     path: '*',
