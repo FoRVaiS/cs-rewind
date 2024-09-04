@@ -17,11 +17,21 @@ export default {
 
   'REGISTRATION_FORM_HAVE_EXISTING_ACCOUNT': 'Already have an account?',
 
+  'DASHBOARD_PLACEHOLDER_TITLE': 'Under Construction!',
+
+  'ERROR_404_TITLE': 'Page Not Found!',
+  'ERROR_404_DESCRIPTION': 'Oops! The page you\'re looking for doesn\'t exist.',
+
   'LOGIN': 'Login',
   'REGISTER': 'Register',
   'NEXT': 'Next',
   'FINISH': 'Finish',
   'SKIP': 'Skip',
+  'HOME': 'Home',
+  'EMAIL': 'Email',
+  'PASSWORD': 'Password',
+  'PASSWORD_CONFIRM': 'Password Confirm',
+  'SIGN_IN': 'Sign In',
 
   'ERROR_MISMATCHED_PASSWORDS': 'You have mismatched passwords, please try again.',
 } satisfies Locale;

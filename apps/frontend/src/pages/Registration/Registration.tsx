@@ -66,19 +66,19 @@ function RegistrationPage() {
           <div className="grid gap-4">
             {/* Email Field */}
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{en.EMAIL}</Label>
               <Input id="email" type="email" onChange={v => setEmail(v.currentTarget.value)} value={email} required />
             </div>
 
             {/* Password Field */}
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{en.PASSWORD}</Label>
               <Input id="password" type="password" onChange={v => setPassword(v.currentTarget.value)} value={password} required />
             </div>
 
             {/* Password Confirm Field */}
             <div className="grid gap-2">
-              <Label htmlFor="password-confirm">Password Confirm</Label>
+              <Label htmlFor="password-confirm">{en.PASSWORD_CONFIRM}</Label>
               <Input id="password-confirm" type="password" onChange={v => setPasswordConfirm(v.currentTarget.value)} value={passwordConfirm} required />
             </div>
           </div>
@@ -86,7 +86,7 @@ function RegistrationPage() {
 
         <CardFooter className="flex flex-col gap-5 text-sm justify-center">
           <Button className="w-full" onClick={submit}>{en.FINISH}</Button>
-          <Link className="underline" to="/login">Already have an account?</Link>
+          <Link className="underline" to="/login">{en.REGISTRATION_FORM_HAVE_EXISTING_ACCOUNT}</Link>
         </CardFooter>
 
       </Card>
