@@ -3,6 +3,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import z from 'zod';
 
+import en from '@/locales/en';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -57,22 +59,22 @@ function LoginPage() {
     <main className="flex flex-col items-center">
       <Card className="mx-auto mt-16 min-w-[448px]">
         <CardHeader>
-          <CardTitle className="text-xl text-center">Login</CardTitle>
+          <CardTitle className="text-xl text-center">{en.LOGIN}</CardTitle>
         </CardHeader>
 
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{en.EMAIL}</Label>
             <Input id="email" type="email" onChange={e => setEmail(e.currentTarget.value)} onKeyDown={({ key }) => key === 'Enter' && login()} required />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{en.PASSWORD}</Label>
             <Input id="password" type="password" onChange={e => setPassword(e.currentTarget.value)} onKeyDown={({ key }) => key === 'Enter' && login()} required />
           </div>
         </CardContent>
 
         <CardFooter>
-          <Button className="w-full" onClick={login}>Sign in</Button>
+          <Button className="w-full" onClick={login}>{en.SIGN_IN}</Button>
         </CardFooter>
       </Card>
     </main>
