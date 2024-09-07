@@ -28,13 +28,20 @@ function RegistrationPage() {
   const [passwordConfirm, setPasswordConfirm] = useState<string>('');
 
   const apiRegisterAccount = useMutation({
-    mutationFn: (data: FormData) => fetch('/api/user/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    }),
+    mutationFn: async (data: FormData) => {
+      const response = await fetch('/api/user/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      return {
+        httpStatus: response.status,
+        ...(await response.json()),
+      };
+    },
   });
 
   const submit = () => {
