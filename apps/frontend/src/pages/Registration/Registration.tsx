@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import z from 'zod';
+import z, { ZodError } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 
 import { ERROR_ACCOUNT_ALREADY_EXISTS, ERROR_INVALID_EMAIL_FORMAT, ERROR_INVALID_PASSWORD_FORMAT } from '@rewind/error-codes';
 import en from '@/locales/en.ts';
+import { raise } from '@/lib/utils';
 
 /* ===== Validators ===== */
 const formValidator = z.object({
@@ -22,11 +23,17 @@ type FormData = z.infer<typeof formValidator>;
 
 function RegistrationPage() {
   const navigate = useNavigate();
+  const [alertMsg, setAlert] = useState<string>('');
 
   // Form Data
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [passwordConfirm, setPasswordConfirm] = useState<string>('');
+
+  const alertAccountExists = setAlert.bind(null, en.ERROR_ACCOUNT_ALREADY_EXISTS);
+  const alertInvalidEmailFormat = setAlert.bind(null, en.ERROR_INVALID_EMAIL_FORMAT);
+  const alertInvalidPasswordFormat = setAlert.bind(null, en.ERROR_INVALID_PASSWORD_FORMAT);
+  const alertFailedPasswordConfirmation = setAlert.bind(null, en.ERROR_MISMATCHED_PASSWORDS);
 
   const apiRegisterAccount = useMutation({
     mutationFn: async (data: FormData) => {
@@ -47,17 +54,35 @@ function RegistrationPage() {
 
   const submit = () => {
     const formData: FormData = { email, password, passwordConfirm };
-    const validation = formValidator.parse(formData);
+    let validation: Parameters<typeof apiRegisterAccount['mutate']>[0];
 
-    if (password !== passwordConfirm) throw new Error(en.ERROR_MISMATCHED_PASSWORDS);
+    setAlert('');
 
-    apiRegisterAccount.mutate(validation, {
+    try {
+      validation = formValidator.parse(formData);
+    } catch (e) {
+      if (e instanceof ZodError) {
+        const error = e.issues[0] ?? raise('ZodError was raised but could find the first ZodIssue');
+
+        const { code } = error;
+        const path = error.path[0] ?? raise('Could not find offending key');
+
+        if (path === 'email' && code === 'invalid_type') return alertInvalidEmailFormat(); // Missing entry in email field
+        if (path === 'email' && code === 'invalid_string') return alertInvalidEmailFormat(); // Bad email format
+        if (path === 'password' && code === 'invalid_type') return alertInvalidPasswordFormat(); // Missing entry in password field
+        if (path === 'password' && code === 'too_small') return alertInvalidPasswordFormat(); // Password does not meet min length requirement
+      }
+    }
+
+    if (password !== passwordConfirm) return alertFailedPasswordConfirmation();
+
+    return apiRegisterAccount.mutate((validation! ?? raise('Could not get form data.')), {
       onSuccess: data => {
         const { httpStatus, errNo } = data;
 
-        if (errNo === ERROR_ACCOUNT_ALREADY_EXISTS) return console.error(en.ERROR_ACCOUNT_ALREADY_EXISTS);
-        if (errNo === ERROR_INVALID_PASSWORD_FORMAT) return console.error(en.ERROR_INVALID_PASSWORD_FORMAT);
-        if (errNo === ERROR_INVALID_EMAIL_FORMAT) return console.error(en.ERROR_INVALID_EMAIL_FORMAT);
+        if (errNo === ERROR_ACCOUNT_ALREADY_EXISTS) return alertAccountExists();
+        if (errNo === ERROR_INVALID_EMAIL_FORMAT) return alertInvalidEmailFormat();
+        if (errNo === ERROR_INVALID_PASSWORD_FORMAT) return alertInvalidPasswordFormat();
 
         if (httpStatus === 200) return navigate('/login');
 
@@ -66,12 +91,20 @@ function RegistrationPage() {
     });
   };
 
+  const Alert = ({ msg }: { msg: string }) => (
+    <div className="w-full">
+      <p className="text-wrap text-center text-red-500">{msg}</p>
+    </div>
+  );
+
   return (
     <main className="flex flex-col justify-center">
-      <Card className="mx-auto mt-16 min-w-[448px]">
+      <Card className="mx-auto mt-16 w-[448px]">
 
-        <CardHeader>
+        <CardHeader className="gap-4">
           <CardTitle className="text-xl text-center">{en.REGISTRATION_FORM_SIGN_UP_TITLE}</CardTitle>
+
+          {alertMsg && <Alert msg={alertMsg} />}
         </CardHeader>
 
         <CardContent>
