@@ -34,6 +34,10 @@ const keys = [
   'SIGN_IN',
 
   'ERROR_MISMATCHED_PASSWORDS',
+  'ERROR_ACCOUNT_ALREADY_EXISTS',
+  'ERROR_INVALID_EMAIL_FORMAT',
+  'ERROR_INVALID_PASSWORD_FORMAT',
+  'ERROR_INVALID_CREDENTIALS',
 ] as const;
 
 export type Locale = Record<typeof keys[number], string>;

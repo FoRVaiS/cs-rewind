@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+import { ERROR_ACCOUNT_ALREADY_EXISTS, ERROR_INVALID_EMAIL_FORMAT, ERROR_INVALID_PASSWORD_FORMAT } from '@rewind/error-codes';
 import en from '@/locales/en.ts';
 
 /* ===== Validators ===== */
@@ -52,11 +53,15 @@ function RegistrationPage() {
 
     apiRegisterAccount.mutate(validation, {
       onSuccess: data => {
-        const { status } = data;
+        const { httpStatus, errNo } = data;
 
-        if (status === 200) return navigate('/login');
+        if (errNo === ERROR_ACCOUNT_ALREADY_EXISTS) return console.error(en.ERROR_ACCOUNT_ALREADY_EXISTS);
+        if (errNo === ERROR_INVALID_PASSWORD_FORMAT) return console.error(en.ERROR_INVALID_PASSWORD_FORMAT);
+        if (errNo === ERROR_INVALID_EMAIL_FORMAT) return console.error(en.ERROR_INVALID_EMAIL_FORMAT);
 
-        return console.warn(`Unsure how to handle a ${status} response. Not doing anything.`);
+        if (httpStatus === 200) return navigate('/login');
+
+        return console.warn(`Unsure how to handle a ${httpStatus} response. Not doing anything.`);
       },
     });
   };

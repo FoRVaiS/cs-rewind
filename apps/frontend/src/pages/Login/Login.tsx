@@ -16,6 +16,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+import { ERROR_INVALID_CREDENTIALS } from '@rewind/error-codes';
+
 /* ===== Validators ===== */
 const loginValidator = z.object({
   email: z.string().email(),
@@ -31,13 +33,21 @@ function LoginPage() {
   const [password, setPassword] = useState<string>('');
 
   const apiLogin = useMutation({
-    mutationFn: (data: LoginData) => fetch('/api/user/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    }),
+    mutationFn: async (data: LoginData) => {
+      const response = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+
+      return {
+        httpStatus: response.status,
+        ...(await response.json()),
+      };
+    },
   });
 
   const login = () => {
@@ -46,11 +56,13 @@ function LoginPage() {
 
     apiLogin.mutate(validation, {
       onSuccess: data => {
-        const { status } = data;
+        const { httpStatus, errNo } = data;
 
-        if (status === 200) return navigate('/dashboard');
+        if (errNo === ERROR_INVALID_CREDENTIALS) return console.error(en.ERROR_INVALID_CREDENTIALS);
 
-        return console.warn(`Unsure how to handle a ${status} response. Not doing anything.`);
+        if (httpStatus === 200) return navigate('/dashboard');
+
+        return console.warn(`Unsure how to handle a ${httpStatus} response. Not doing anything.`);
       },
     });
   };
