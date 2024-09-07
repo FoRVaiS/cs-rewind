@@ -19,6 +19,7 @@ type HandlerPromise<T extends ResponseData> = (req: express.Request, res: expres
 
 export type ResponseBody = {
   err?: unknown,
+  errNo?: number,
   data: unknown,
   pagination?: {
     prev?: string | null
@@ -66,9 +67,14 @@ export function sendResponse<T extends ResponseData>(status: number, data: T) {
     };
 
     let err: unknown;
+    let errNo: number = -1;
 
     if (data instanceof Error || data instanceof ApiError) {
       err = data.message;
+    }
+
+    if (data instanceof ApiError) {
+      errNo = data.errorCode;
     }
 
     const hasError = !!isError(data);
@@ -95,6 +101,7 @@ export function sendResponse<T extends ResponseData>(status: number, data: T) {
 
     if (hasError) {
       responseBody.err = err;
+      responseBody.errNo = errNo;
 
       delete responseBody.data; // Do not provide potentional malformed data to the user.
     }
@@ -136,8 +143,8 @@ export function use<T extends ResponseData>(handler: Handler<T> | HandlerPromise
   };
 }
 
-export function raiseApi(msg: string, code: number): never {
-  throw new ApiError(msg, code);
+export function raiseApi(msg: string, errorCode: number, code: number): never {
+  throw new ApiError(msg, errorCode, code);
 }
 
 export function raise(msg: string): never {

@@ -2,6 +2,7 @@ import express from 'express';
 import z, { ZodError } from 'zod';
 
 import { ApiError } from '@rewind/express-api/errors';
+import { ERROR_UNKNOWN, ERROR_INVALID_EMAIL_FORMAT, ERROR_INVALID_PASSWORD_FORMAT, ERROR_ACCOUNT_ALREADY_EXISTS, ERROR_INVALID_CREDENTIALS } from '@rewind/error-codes';
 import { raise, raiseApi } from '@rewind/express-api/utils';
 import { PgError } from '@rewind/drizzle';
 
@@ -30,12 +31,12 @@ export async function handleRegisterRequest(req: express.Request) {
     if (e instanceof PgError) {
       const code = Number(e.code);
 
-      if (code === 23505) return new ApiError(`"${email}" already exists.`, 409);
+      if (code === 23505) return new ApiError(`"${email}" already exists.`, ERROR_ACCOUNT_ALREADY_EXISTS, 409);
     }
 
     if (e instanceof ApiError) return e;
 
-    return new ApiError('Internal Server Error', 500);
+    return new ApiError('Internal Server Error', ERROR_UNKNOWN, 500);
   }
 }
 
@@ -43,11 +44,11 @@ export async function handleLoginRequest(req: express.Request) {
   try {
     const { email, password } = loginCredentialsValidator.parse(req.body);
 
-    const user = (await getUser(email)) ?? raiseApi(`User ${email} does not exist.`, 404);
+    const user = (await getUser(email)) ?? raiseApi(`User ${email} does not exist.`, ERROR_INVALID_CREDENTIALS, 404);
     const passwordValidator = comparePasswords.bind(null, user.password);
 
     const authenticated = await login(password, user.salt, passwordValidator);
-    if (!authenticated) return new ApiError('Incorrect email or password', 401);
+    if (!authenticated) return new ApiError('Incorrect email or password', ERROR_INVALID_CREDENTIALS, 401);
 
     return 'OK!';
   } catch (e) {
@@ -59,12 +60,12 @@ export async function handleLoginRequest(req: express.Request) {
       const { code } = error;
       const path = error.path[0] ?? raise('Could not find offending key');
 
-      if (path === 'email' && code === 'invalid_type') return new ApiError('The email address provided is not valid.', 400); // Missing "email" in body
-      if (path === 'email' && code === 'invalid_string') return new ApiError('Please enter a valid email address format.', 400); // Bad email format
+      if (path === 'email' && code === 'invalid_type') return new ApiError('The email address provided is not valid.', ERROR_INVALID_EMAIL_FORMAT, 400); // Missing "email" in body
+      if (path === 'email' && code === 'invalid_string') return new ApiError('Please enter a valid email address format.', ERROR_INVALID_EMAIL_FORMAT, 400); // Bad email format
 
-      if (path === 'password' && code === 'invalid_type') return new ApiError('The password provided is not valid.', 400); // Missing "password" in body
+      if (path === 'password' && code === 'invalid_type') return new ApiError('The password provided is not valid.', ERROR_INVALID_PASSWORD_FORMAT, 400); // Missing "password" in body
     }
 
-    return new ApiError('Internal Server Error', 500);
+    return new ApiError('Internal Server Error', ERROR_UNKNOWN, 500);
   }
 }

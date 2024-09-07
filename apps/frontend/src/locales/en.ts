@@ -34,4 +34,8 @@ export default {
   'SIGN_IN': 'Sign In',
 
   'ERROR_MISMATCHED_PASSWORDS': 'You have mismatched passwords, please try again.',
+  'ERROR_ACCOUNT_ALREADY_EXISTS': 'Your email is already associated with an existing account.',
+  'ERROR_INVALID_EMAIL_FORMAT': 'The email you provided is not a valid email.',
+  'ERROR_INVALID_PASSWORD_FORMAT': 'Verify that your password meets all the requirements.',
+  'ERROR_INVALID_CREDENTIALS': 'The account does not exist or your password is incorrect.',
 } satisfies Locale;
