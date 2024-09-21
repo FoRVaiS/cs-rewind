@@ -15,12 +15,16 @@
     "@rewind/express-api": "*",
     "@rewind/drizzle": "*",
     "@rewind/logger": "*",
+    "connect-pg-simple": "^10.0.0",
     "express": "^4.19.2",
+    "express-session": "^1.18.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
+    "@types/connect-pg-simple": "^7.0.3",
     "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
     "@types/node": "^20.14.12",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
