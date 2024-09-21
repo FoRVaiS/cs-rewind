@@ -16,44 +16,50 @@ export type Route = {
   router: express.Router
 }
 
-export class Api {
-  public readonly app: express.Application;
-  private server: ReturnType<express.Application['listen']> | null = null;
+export function createApi(apply: (app: express.Application) => void) {
+  class Api {
+    public readonly app: express.Application;
+    public server: ReturnType<express.Application['listen']> | null = null;
 
-  constructor(routes: Route[], private readonly writeStream: (msg: string) => void = console.log) {
-    this.app = express();
+    constructor(routes: Route[], public readonly writeStream: (msg: string) => void = console.log) {
+      this.app = express();
 
-    this.app.use(helmet());
-    this.app.use(cors());
-    this.app.use(morgan(IS_DEV ? 'dev' : 'combined', {
-      stream: {
-        write: (msg: string) => writeStream(msg.trim()),
-      },
-    }));
+      this.app.use(helmet());
+      this.app.use(cors());
+      this.app.use(morgan(IS_DEV ? 'dev' : 'combined', {
+        stream: {
+          write: (msg: string) => writeStream(msg.trim()),
+        },
+      }));
 
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
-    //
-    // Set a default page and limit, if the user fails to provide either
-    this.app.use(pagination(DEFAULT_PAGE, DEFAULT_LIMIT));
+      this.app.use(express.json());
+      this.app.use(express.urlencoded({ extended: true }));
 
-    for (const route of routes) {
-      this.app.use(route.path, route.router);
+      apply(this.app);
+
+      // Set a default page and limit, if the user fails to provide either
+      this.app.use(pagination(DEFAULT_PAGE, DEFAULT_LIMIT));
+
+      for (const route of routes) {
+        this.app.use(route.path, route.router);
+      }
+
+      this.app.get('/healthz', use(() => 'OK!'));
+      this.app.all('*', use((req: express.Request) => new ApiRouteNotFound(req.url)));
     }
 
-    this.app.get('/healthz', use(() => 'OK!'));
-    this.app.all('*', use((req: express.Request) => new ApiRouteNotFound(req.url)));
+    public start(host: string, port: number, cb?: () => void) {
+      const defaultCb = () => {
+        this.writeStream(`Listening on http://${host}:${port} in ${env.NODE_ENV} mode.`);
+      };
+
+      this.server = this.app.listen(port, host, cb || defaultCb);
+    }
+
+    public stop() {
+      if (this.server) this.server.close();
+    }
   }
 
-  public start(host: string, port: number, cb?: () => void) {
-    const defaultCb = () => {
-      this.writeStream(`Listening on http://${host}:${port} in ${env.NODE_ENV} mode.`);
-    };
-
-    this.server = this.app.listen(port, host, cb || defaultCb);
-  }
-
-  public stop() {
-    if (this.server) this.server.close();
-  }
+  return Api;
 }
