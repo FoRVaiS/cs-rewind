@@ -45,6 +45,7 @@ const envSchema = z.object({
   POSTGRES_USER: z.string().optional(),
   POSTGRES_PASSWORD: z.string().optional(),
   POSTGRES_DATABASE: z.string().optional(),
+  POSTGRES_SESSION_DATABASE: z.string().optional(),
 
   REDIS_HOST: z.string().default(DEFAULT_REDIS_HOST),
   REDIS_PORT: z.number({ coerce: true }).default(DEFAULT_REDIS_PORT),
@@ -60,6 +61,8 @@ const envSchema = z.object({
   MINIO_USER: z.string().optional(),
   MINIO_PASSWORD: z.string().optional(),
   MINIO_BUCKET_DEMOS: z.string().default(DEFAULT_MINIO_BUCKET_DEMOS),
+
+  SESSION_SECRET: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);
